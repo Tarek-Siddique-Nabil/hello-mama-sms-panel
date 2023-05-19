@@ -31,32 +31,38 @@ const FirebaseContextProvider = ({ children }) => {
       const response = await axios.get(url);
       const json = response.data;
       if (json) {
-        toast.success("Login Successfully", {
-          duration: 1500,
-          position: "top-center",
-        });
-        localStorage.setItem("User email", json.email);
         if (json?.role === "Delivery Boy") {
           localStorage.setItem(
             "User role",
-            `${import.meta.env.VITE_APP_SECRET_DELIVERY_BOY}`
+            `${import.meta.env.VITE_APP_SECRET_CODE_DELIVERY_BOY}`
           );
-        }
+          signInWithEmailAndPassword(auth, email, password)
+            .then((userCredential) => {
+              // Signed in
+              const user = userCredential?.user;
 
-        signInWithEmailAndPassword(auth, email, password)
-          .then((userCredential) => {
-            // Signed in
-            const user = userCredential?.user;
-            console.log("User signed in:", user);
-            setUser(user);
-            navigate("/");
-          })
-          .catch((error) => {
-            const errorCode = error.code;
-            console.log("Sign in error code:", errorCode);
-            const errorMessage = error.message;
-            console.log("Sign in error message:", errorMessage);
+              setUser(user);
+              navigate("/");
+              if (user) {
+                toast.success("Login Successfully", {
+                  duration: 1500,
+                  position: "top-center",
+                });
+                localStorage.setItem("User email", user?.email);
+              }
+            })
+            .catch((error) => {
+              const errorCode = error.code;
+              console.log("Sign in error code:", errorCode);
+              const errorMessage = error.message;
+              console.log("Sign in error message:", errorMessage);
+            });
+        } else {
+          toast.error("This is not Delivery Boy Account ", {
+            position: "top-center",
+            duration: 2500,
           });
+        }
       } else {
         toast.error("User Not Found in DataBase", {
           position: "top-center",
